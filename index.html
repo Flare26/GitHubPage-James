@@ -202,37 +202,133 @@
       box-shadow: 0 0 6px rgba(233,196,106,0.5);
     }
 
-    /* ── QUOTES BANNER ── */
-    .quotes-banner {
+    /* ── QUOTES TIMELINE ── */
+    .timeline-section {
       background: var(--blue);
-      color: rgba(255,255,255,0.75);
-      padding: 2.5rem 2rem;
+      padding: 4rem 2rem;
+      position: relative;
+    }
+    .timeline-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 80%, rgba(214,40,40,0.15), transparent),
+        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(233,196,106,0.1), transparent);
+      pointer-events: none;
+    }
+    .timeline-title {
       text-align: center;
       font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: #fff;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+    .timeline-title span {
+      color: var(--gold);
+    }
+    .timeline {
+      position: relative;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 1rem 0;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, transparent, var(--gold) 10%, var(--gold) 90%, transparent);
+      transform: translateX(-50%);
+    }
+    .tl-item {
+      position: relative;
+      width: 50%;
+      padding: 0 2.5rem 3rem;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .tl-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .tl-item:nth-child(odd) {
+      left: 0;
+      text-align: right;
+    }
+    .tl-item:nth-child(even) {
+      left: 50%;
+      text-align: left;
+    }
+    .tl-dot {
+      position: absolute;
+      top: 0.3rem;
+      width: 16px;
+      height: 16px;
+      background: var(--gold);
+      border: 3px solid var(--blue);
+      border-radius: 50%;
+      z-index: 2;
+      box-shadow: 0 0 12px rgba(233,196,106,0.4);
+    }
+    .tl-item:nth-child(odd) .tl-dot {
+      right: -8px;
+    }
+    .tl-item:nth-child(even) .tl-dot {
+      left: -8px;
+    }
+    .tl-date {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.4rem;
+    }
+    .tl-card {
+      display: inline-block;
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1.2rem 1.5rem;
+      text-align: left;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .tl-card:hover {
+      background: rgba(255,255,255,0.12);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+    .tl-card a {
+      font-family: 'Playfair Display', serif;
       font-style: italic;
-      font-size: 1.05rem;
-      line-height: 1.8;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-    .quote-item {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-    }
-    .quote-item a {
-      color: rgba(255,255,255,0.75);
+      font-size: 1rem;
+      color: rgba(255,255,255,0.85);
       text-decoration: none;
+      line-height: 1.6;
       transition: color 0.2s;
     }
-    .quote-item a:hover {
+    .tl-card a:hover {
       color: var(--gold);
+    }
+    .tl-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .tl-item:nth-child(odd) .tl-actions {
+      justify-content: flex-end;
     }
     .share-btn {
       flex-shrink: 0;
-      background: rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.1);
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 50%;
       width: 28px;
@@ -255,6 +351,15 @@
       stroke: rgba(255,255,255,0.7);
       stroke-width: 2;
     }
+
+    @media (max-width: 600px) {
+      .timeline::before { left: 20px; }
+      .tl-item { width: 100%; left: 0 !important; padding: 0 0 2.5rem 3rem; text-align: left !important; }
+      .tl-item .tl-dot { left: 12px !important; right: auto !important; }
+      .tl-item .tl-actions { justify-content: flex-start !important; }
+    }
+
+    /* ── TOAST ── */
     .share-toast {
       position: fixed;
       bottom: 2rem;
@@ -266,16 +371,306 @@
       border-radius: 999px;
       font-weight: 700;
       font-size: 0.85rem;
-      font-style: normal;
       opacity: 0;
       transition: opacity 0.3s, transform 0.3s;
       pointer-events: none;
-      z-index: 999;
+      z-index: 9999;
     }
     .share-toast.show {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
+
+    /* ── ACHIEVEMENTS ── */
+    .ach-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 900;
+      background: var(--dark);
+      border: 2px solid var(--gold);
+      border-radius: 999px;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      color: var(--gold);
+      font-family: 'Source Sans 3', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .ach-toggle:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 24px rgba(233,196,106,0.3);
+    }
+    .ach-toggle svg { width: 18px; height: 18px; }
+    .ach-count {
+      background: var(--gold);
+      color: var(--dark);
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .ach-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1001;
+      background: rgba(11,17,32,0);
+      backdrop-filter: blur(0px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s ease;
+    }
+    .ach-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+      background: rgba(11,17,32,0.85);
+      backdrop-filter: blur(16px);
+    }
+    .ach-panel {
+      background: var(--dark);
+      border: 1px solid rgba(233,196,106,0.2);
+      border-radius: 20px;
+      padding: 2.5rem;
+      max-width: 480px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      transform: scale(0.85) translateY(20px);
+      transition: transform 0.4s cubic-bezier(.16,1,.3,1);
+    }
+    .ach-overlay.active .ach-panel {
+      transform: scale(1) translateY(0);
+    }
+    .ach-panel-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 0.3rem;
+    }
+    .ach-panel-sub {
+      text-align: center;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .ach-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .ach-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .ach-row.unlocked {
+      background: rgba(233,196,106,0.08);
+      border-color: rgba(233,196,106,0.2);
+    }
+    .ach-icon {
+      font-size: 1.6rem;
+      width: 40px;
+      text-align: center;
+      flex-shrink: 0;
+      filter: grayscale(1) opacity(0.3);
+      transition: filter 0.3s;
+    }
+    .ach-row.unlocked .ach-icon {
+      filter: none;
+    }
+    .ach-info { flex: 1; }
+    .ach-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.4);
+      transition: color 0.3s;
+    }
+    .ach-row.unlocked .ach-name { color: #fff; }
+    .ach-desc {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.3);
+      margin-top: 0.15rem;
+    }
+    .ach-row.unlocked .ach-desc { color: rgba(255,255,255,0.5); }
+    .ach-check {
+      color: var(--gold);
+      font-size: 1.2rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .ach-row.unlocked .ach-check { opacity: 1; }
+    .ach-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .ach-close:hover { background: rgba(255,255,255,0.2); }
+
+    .ach-toast {
+      position: fixed;
+      top: 4.5rem;
+      right: 1rem;
+      z-index: 9999;
+      background: var(--dark);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 1rem 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      opacity: 0;
+      transform: translateX(120%);
+      transition: opacity 0.4s, transform 0.4s cubic-bezier(.16,1,.3,1);
+      pointer-events: none;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      max-width: 320px;
+    }
+    .ach-toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .ach-toast-icon { font-size: 1.6rem; }
+    .ach-toast-text {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.5);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .ach-toast-name {
+      font-size: 1rem;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    /* ── COOKIE CONSENT ── */
+    .cookie-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(11,17,32,0);
+      backdrop-filter: blur(0px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s ease;
+    }
+    .cookie-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+      background: rgba(11,17,32,0.85);
+      backdrop-filter: blur(16px);
+    }
+    .cookie-panel {
+      background: var(--dark);
+      border: 2px solid var(--gold);
+      border-radius: 24px;
+      padding: 2.5rem;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      transform: scale(0.85) translateY(20px);
+      transition: transform 0.4s cubic-bezier(.16,1,.3,1);
+    }
+    .cookie-overlay.active .cookie-panel {
+      transform: scale(1) translateY(0);
+    }
+    .cookie-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .cookie-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .cookie-desc {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .cookie-ach-preview {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(233,196,106,0.1);
+      border: 1px solid rgba(233,196,106,0.2);
+      border-radius: 12px;
+      padding: 0.7rem 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .cookie-ach-preview-icon { font-size: 1.4rem; }
+    .cookie-ach-preview-name {
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .cookie-btns {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+    .cookie-btn {
+      padding: 0.65rem 1.6rem;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cookie-btn:hover { transform: scale(1.05); }
+    .cookie-btn-yes {
+      background: var(--gold);
+      color: var(--dark);
+    }
+    .cookie-btn-yes:hover { box-shadow: 0 4px 20px rgba(233,196,106,0.4); }
+    .cookie-btn-no {
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.6);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .cookie-btn-no:hover { background: rgba(255,255,255,0.18); }
 
     /* ── MAIN ── */
     main {
@@ -490,6 +885,81 @@
     .magnify-overlay.active .magnify-close { opacity: 1; }
     .magnify-close:hover { background: rgba(255,255,255,0.2); }
 
+    /* ── AUDIO-REACTIVE ── */
+    .audio-active .stars span {
+      transition: transform 0.05s ease-out;
+    }
+    .audio-active .hero-content h1 .accent {
+      transition: text-shadow 0.08s ease-out, transform 0.08s ease-out;
+    }
+    .audio-active .anthem-bar {
+      transition: border-color 0.08s ease-out, box-shadow 0.08s ease-out;
+    }
+    .audio-active .tl-dot {
+      transition: box-shadow 0.08s ease-out, transform 0.08s ease-out;
+    }
+
+    /* ── 100% COMPLETION ── */
+    .confetti-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      pointer-events: none;
+    }
+
+    .james-complete .ach-toggle {
+      border-color: transparent;
+      animation: goldPulse 2s ease-in-out infinite;
+      background: linear-gradient(135deg, var(--dark), #2a1f00);
+    }
+    @keyframes goldPulse {
+      0%, 100% { box-shadow: 0 0 15px rgba(233,196,106,0.4), 0 0 30px rgba(233,196,106,0.1); border-color: var(--gold); }
+      50% { box-shadow: 0 0 25px rgba(233,196,106,0.7), 0 0 50px rgba(233,196,106,0.2); border-color: #fff3b0; }
+    }
+
+    .james-complete .stars span {
+      background: rgba(233,196,106,0.6) !important;
+    }
+
+    .james-complete .hero-content h1 .accent {
+      background: linear-gradient(90deg, var(--gold), #fff3b0, var(--gold));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 3s linear infinite;
+    }
+    @keyframes shimmer {
+      to { background-position: 200% center; }
+    }
+
+    .complete-banner {
+      text-align: center;
+      padding: 2rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .complete-banner.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .complete-banner .legend-title {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+    .complete-banner .legend-sub {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      font-family: 'Source Sans 3', sans-serif;
+      font-weight: 400;
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       main { padding: 2.5rem 1.25rem 1rem; }
@@ -529,37 +999,76 @@
     </div>
   </div>
 
-  <!-- ── QUOTES BANNER ── -->
-  <div class="quotes-banner">
-    <div class="quote-item">
-      <a href="quotes/0.html">"I hate for the love of the game, baby. -James 1/24/25"</a>
-      <button class="share-btn" onclick="shareQuote(0)" title="Share this quote">
-        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      </button>
-    </div>
-    <div class="quote-item">
-      <a href="quotes/1.html">"...If I was unemployed for that long, there probably wouldn't be a CRPG left on the planet that I have not played. -James 2/4/25"</a>
-      <button class="share-btn" onclick="shareQuote(1)" title="Share this quote">
-        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      </button>
-    </div>
-    <div class="quote-item">
-      <a href="quotes/2.html">"You right, if I didn't like being right I wouldn't be the way I am. -James 3/30/26"</a>
-      <button class="share-btn" onclick="shareQuote(2)" title="Share this quote">
-        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      </button>
-    </div>
-    <div class="quote-item">
-      <a href="quotes/3.html">"Why would I open my ears, a black woman was not speaking. -James 4/03/26"</a>
-      <button class="share-btn" onclick="shareQuote(3)" title="Share this quote">
-        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      </button>
-    </div>
-    <div class="quote-item">
-      <a href="quotes/4.html">"I love Trevors toes" -James 7/20/26</a>
-      <button class="share-btn" onclick="shareQuote(4)" title="Share this quote">
-        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      </button>
+  <!-- ── QUOTES TIMELINE ── -->
+  <div class="timeline-section">
+    <div class="timeline-title">The <span>James</span> Archives</div>
+    <div class="timeline">
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-date">January 24, 2025</div>
+        <div class="tl-card">
+          <a href="quotes/0.html" onclick="unlockAch('quote_clicked')">"I hate for the love of the game, baby."</a>
+          <div class="tl-actions">
+            <button class="share-btn" onclick="shareQuote(0)" title="Share this quote">
+              <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-date">February 4, 2025</div>
+        <div class="tl-card">
+          <a href="quotes/1.html" onclick="unlockAch('quote_clicked')">"...If I was unemployed for that long, there probably wouldn't be a CRPG left on the planet that I have not played."</a>
+          <div class="tl-actions">
+            <button class="share-btn" onclick="shareQuote(1)" title="Share this quote">
+              <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-date">March 30, 2026</div>
+        <div class="tl-card">
+          <a href="quotes/2.html" onclick="unlockAch('quote_clicked')">"You right, if I didn't like being right I wouldn't be the way I am."</a>
+          <div class="tl-actions">
+            <button class="share-btn" onclick="shareQuote(2)" title="Share this quote">
+              <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-date">April 3, 2026</div>
+        <div class="tl-card">
+          <a href="quotes/3.html" onclick="unlockAch('quote_clicked')">"Why would I open my ears, a black woman was not speaking."</a>
+          <div class="tl-actions">
+            <button class="share-btn" onclick="shareQuote(3)" title="Share this quote">
+              <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-date">July 21, 2026</div>
+        <div class="tl-card">
+          <a href="quotes/4.html" onclick="unlockAch('quote_clicked')">"I love Trevors toes"</a>
+          <div class="tl-actions">
+            <button class="share-btn" onclick="shareQuote(4)" title="Share this quote">
+              <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
   <div class="share-toast" id="shareToast">Link copied!</div>
@@ -669,14 +1178,61 @@
     </div>
 
     <div class="explore-link">
-      <a href="https://en.wikipedia.org/wiki/MS-13">Explore more about James</a>
+      <a href="https://en.wikipedia.org/wiki/MS-13" id="exploreLink" onclick="unlockAch('explorer')">Explore more about James</a>
     </div>
 
   </main>
 
+  <div class="complete-banner" id="completeBanner">
+    <span class="legend-title">LIBERAL LEGEND</span>
+    <span class="legend-sub">You've unlocked every achievement. James would be proud. Maybe.</span>
+  </div>
+
+  <canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+
   <footer>
     <p>&copy; 2025 James is a Liberal. All Rights Reserved.</p>
   </footer>
+
+  <!-- ── COOKIE CONSENT ── -->
+  <div class="cookie-overlay" id="cookieOverlay">
+    <div class="cookie-panel">
+      <div class="cookie-icon">🍪</div>
+      <div class="cookie-title">Achievement Discovered!</div>
+      <div class="cookie-desc">You just unlocked something. Want to save your progress with a cookie so it's here next time you visit?</div>
+      <div class="cookie-ach-preview" id="cookieAchPreview">
+        <div class="cookie-ach-preview-icon" id="cookieAchIcon"></div>
+        <div class="cookie-ach-preview-name" id="cookieAchName"></div>
+      </div>
+      <div class="cookie-btns">
+        <button class="cookie-btn cookie-btn-yes" onclick="acceptCookies()">Save My Progress</button>
+        <button class="cookie-btn cookie-btn-no" onclick="declineCookies()">Nah, I'm Good</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ACHIEVEMENTS ── -->
+  <button class="ach-toggle" id="achToggle" onclick="toggleAchPanel()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 22V8a6 6 0 0112 0v14"/><path d="M14 22V8a6 6 0 00-12 0v14"/></svg>
+    <span id="achLabel">0 / 7</span>
+  </button>
+
+  <div class="ach-overlay" id="achOverlay">
+    <div class="ach-panel">
+      <button class="ach-close" onclick="toggleAchPanel()">&times;</button>
+      <div class="ach-panel-title">Achievements</div>
+      <div class="ach-panel-sub" id="achSub">0 of 7 unlocked</div>
+      <div class="ach-grid" id="achGrid"></div>
+    </div>
+  </div>
+
+  <div class="ach-toast" id="achToast">
+    <div class="ach-toast-icon" id="achToastIcon"></div>
+    <div>
+      <div class="ach-toast-text">Achievement Unlocked</div>
+      <div class="ach-toast-name" id="achToastName"></div>
+    </div>
+  </div>
 
   <!-- ── MAGNIFY OVERLAY ── -->
   <div class="magnify-overlay" id="magnifyOverlay">
@@ -686,10 +1242,10 @@
   </div>
 
   <script>
-    // Generate twinkling stars
-    const starsContainer = document.getElementById('stars');
-    for (let i = 0; i < 60; i++) {
-      const star = document.createElement('span');
+    // ── Stars ──
+    var starsContainer = document.getElementById('stars');
+    for (var i = 0; i < 60; i++) {
+      var star = document.createElement('span');
       star.style.left = Math.random() * 100 + '%';
       star.style.top = Math.random() * 100 + '%';
       star.style.animationDelay = (Math.random() * 3) + 's';
@@ -698,77 +1254,172 @@
       starsContainer.appendChild(star);
     }
 
-    // Audio controls
-    const jamesAnthem = document.getElementById('jamesAnthem');
-    const playAnthemBtn = document.getElementById('playAnthem');
-    const volumeControl = document.getElementById('volumeControl');
-
+    // ── Audio + Visualizer ──
+    var jamesAnthem = document.getElementById('jamesAnthem');
+    var playAnthemBtn = document.getElementById('playAnthem');
+    var volumeControl = document.getElementById('volumeControl');
     jamesAnthem.volume = 0.5;
 
-    playAnthemBtn.addEventListener('click', () => {
-      jamesAnthem.currentTime = 0;
-      jamesAnthem.play().catch(err => {
-        console.warn('Autoplay prevented or another issue occurred:', err);
+    var audioCtx = null;
+    var analyser = null;
+    var freqData = null;
+    var audioSourceCreated = false;
+
+    function initAudio() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      freqData = new Uint8Array(analyser.frequencyBinCount);
+      if (!audioSourceCreated) {
+        var source = audioCtx.createMediaElementSource(jamesAnthem);
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        audioSourceCreated = true;
+      }
+    }
+
+    function audioPulseLoop() {
+      if (!analyser || jamesAnthem.paused) {
+        document.body.classList.remove('audio-active');
+        return;
+      }
+      document.body.classList.add('audio-active');
+      analyser.getByteFrequencyData(freqData);
+
+      var bass = 0;
+      for (var i = 0; i < 8; i++) bass += freqData[i];
+      bass = bass / (8 * 255);
+
+      var mid = 0;
+      for (var j = 8; j < 40; j++) mid += freqData[j];
+      mid = mid / (32 * 255);
+
+      var accentEl = document.querySelector('.hero-content h1 .accent');
+      if (accentEl) {
+        var glow = Math.round(bass * 40);
+        accentEl.style.textShadow = '0 0 ' + glow + 'px rgba(233,196,106,' + (bass * 0.8) + ')';
+        accentEl.style.transform = 'scale(' + (1 + bass * 0.08) + ')';
+      }
+
+      var anthemBar = document.querySelector('.anthem-bar');
+      if (anthemBar) {
+        var bIntensity = Math.round(bass * 255);
+        anthemBar.style.borderBottomColor = 'rgb(233,' + Math.round(196 + bass * 59) + ',' + Math.round(106 + bass * 100) + ')';
+        anthemBar.style.boxShadow = '0 4px ' + Math.round(bass * 30) + 'px rgba(233,196,106,' + (bass * 0.5) + ')';
+      }
+
+      document.querySelectorAll('.tl-dot').forEach(function(dot) {
+        dot.style.transform = 'scale(' + (1 + mid * 0.6) + ')';
+        dot.style.boxShadow = '0 0 ' + Math.round(12 + mid * 20) + 'px rgba(233,196,106,' + (0.4 + mid * 0.5) + ')';
       });
+
+      document.querySelectorAll('.stars span').forEach(function(star, idx) {
+        if (idx % 3 === 0) {
+          star.style.transform = 'scale(' + (1 + bass * 2) + ')';
+          star.style.opacity = (0.3 + bass * 0.7);
+        }
+      });
+
+      var galleryItems = document.querySelectorAll('.gallery-item');
+      galleryItems.forEach(function(item) {
+        item.style.boxShadow = '0 6px ' + Math.round(24 + mid * 30) + 'px rgba(233,196,106,' + (mid * 0.3) + ')';
+      });
+
+      requestAnimationFrame(audioPulseLoop);
+    }
+
+    playAnthemBtn.addEventListener('click', function() {
+      initAudio();
+      jamesAnthem.currentTime = 0;
+      jamesAnthem.play().then(function() {
+        audioPulseLoop();
+      }).catch(function() {});
+      unlockAch('anthem');
     });
 
-    volumeControl.addEventListener('input', () => {
+    jamesAnthem.addEventListener('ended', function() {
+      document.body.classList.remove('audio-active');
+      var accentEl = document.querySelector('.hero-content h1 .accent');
+      if (accentEl) { accentEl.style.textShadow = ''; accentEl.style.transform = ''; }
+      var anthemBar = document.querySelector('.anthem-bar');
+      if (anthemBar) { anthemBar.style.borderBottomColor = ''; anthemBar.style.boxShadow = ''; }
+      document.querySelectorAll('.tl-dot').forEach(function(d) { d.style.transform = ''; d.style.boxShadow = ''; });
+      document.querySelectorAll('.gallery-item').forEach(function(g) { g.style.boxShadow = ''; });
+    });
+
+    volumeControl.addEventListener('input', function() {
       jamesAnthem.volume = volumeControl.value;
     });
 
-    // Fade-in on scroll
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
+    // ── Scroll fade-in (cards + gallery + timeline) ──
+    var scrollObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
         if (e.isIntersecting) {
           e.target.style.opacity = '1';
           e.target.style.transform = 'translateY(0)';
+          e.target.classList.add('visible');
         }
       });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.15 });
 
-    document.querySelectorAll('.section-card, .gallery-item').forEach(el => {
+    document.querySelectorAll('.section-card, .gallery-item').forEach(function(el) {
       el.style.opacity = '0';
       el.style.transform = 'translateY(30px)';
       el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-      observer.observe(el);
+      scrollObserver.observe(el);
     });
 
+    document.querySelectorAll('.tl-item').forEach(function(el, i) {
+      el.style.transitionDelay = (i * 0.1) + 's';
+      scrollObserver.observe(el);
+    });
+
+    // ── Footer scroll detection ──
+    var footerObserver = new IntersectionObserver(function(entries) {
+      if (entries[0].isIntersecting) unlockAch('scroll_master');
+    }, { threshold: 0.5 });
+    footerObserver.observe(document.querySelector('footer'));
+
     // ── Magnify lightbox ──
-    const overlay = document.getElementById('magnifyOverlay');
-    const magnifyImg = document.getElementById('magnifyImg');
-    const magnifyCaption = document.getElementById('magnifyCaption');
-    const magnifyClose = document.getElementById('magnifyClose');
+    var magnifyOverlay = document.getElementById('magnifyOverlay');
+    var magnifyImg = document.getElementById('magnifyImg');
+    var magnifyCaption = document.getElementById('magnifyCaption');
+    var magnifyCloseBtn = document.getElementById('magnifyClose');
 
     function openMagnify(src, alt) {
       magnifyImg.src = src;
       magnifyImg.alt = alt;
       magnifyCaption.textContent = alt;
-      overlay.classList.add('active');
+      magnifyOverlay.classList.add('active');
       document.body.style.overflow = 'hidden';
+      unlockAch('art_lover');
     }
 
     function closeMagnify() {
-      overlay.classList.remove('active');
+      magnifyOverlay.classList.remove('active');
       document.body.style.overflow = '';
     }
 
-    // Click on gallery image to open
-    document.querySelectorAll('.gallery-item img').forEach(img => {
-      img.addEventListener('click', () => {
+    document.querySelectorAll('.gallery-item img').forEach(function(img) {
+      img.addEventListener('click', function() {
         openMagnify(img.src, img.alt);
       });
     });
 
-    // Close on overlay click, close button, or Escape
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay || e.target === magnifyClose) closeMagnify();
+    magnifyOverlay.addEventListener('click', function(e) {
+      if (e.target === magnifyOverlay || e.target === magnifyCloseBtn) closeMagnify();
     });
-    magnifyClose.addEventListener('click', closeMagnify);
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeMagnify();
+    magnifyCloseBtn.addEventListener('click', closeMagnify);
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeMagnify();
+        var achOv = document.getElementById('achOverlay');
+        if (achOv.classList.contains('active')) toggleAchPanel();
+      }
     });
 
-    // Share quote
+    // ── Share quote ──
     function shareQuote(index) {
       var url = 'https://jamesisaliberal.com/quotes/' + index + '.html';
       navigator.clipboard.writeText(url).then(function() {
@@ -776,7 +1427,229 @@
         t.classList.add('show');
         setTimeout(function() { t.classList.remove('show'); }, 2000);
       });
+      unlockAch('propagandist');
     }
+
+    // ── Cookie helpers ──
+    function setCookie(name, value, days) {
+      var d = new Date();
+      d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+      document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+    }
+
+    function getCookie(name) {
+      var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? decodeURIComponent(match[2]) : null;
+    }
+
+    // ── Achievements ──
+    var ACHIEVEMENTS = [
+      { id: 'anthem',        icon: '🎵', name: 'Comrade Initiate',    desc: 'Play the James Anthem' },
+      { id: 'quote_clicked', icon: '📜', name: 'Quote Scholar',       desc: 'Click on a quote in the timeline' },
+      { id: 'propagandist',  icon: '📣', name: 'Propagandist',        desc: 'Share a quote with the world' },
+      { id: 'art_lover',     icon: '🖼️', name: 'Art Connoisseur', desc: 'View a gallery image up close' },
+      { id: 'explorer',      icon: '🔍', name: 'Deep State Agent',    desc: 'Explore more about James' },
+      { id: 'scroll_master', icon: '🏁', name: 'True Believer',       desc: 'Read the entire page' },
+      { id: 'completionist', icon: '🏆', name: 'James Completionist', desc: 'Unlock every other achievement' }
+    ];
+
+    var cookieConsent = getCookie('james_ach_consent') === 'yes';
+    var consentDeclined = false;
+    var pendingAchId = null;
+    var achState = {};
+
+    if (cookieConsent) {
+      try { achState = JSON.parse(getCookie('james_ach') || '{}'); } catch(e) { achState = {}; }
+    }
+
+    function saveAch() {
+      if (cookieConsent) {
+        setCookie('james_ach', JSON.stringify(achState), 365);
+      }
+    }
+
+    function renderAchPanel() {
+      var grid = document.getElementById('achGrid');
+      var count = 0;
+      grid.innerHTML = '';
+      ACHIEVEMENTS.forEach(function(a) {
+        var unlocked = !!achState[a.id];
+        if (unlocked) count++;
+        var row = document.createElement('div');
+        row.className = 'ach-row' + (unlocked ? ' unlocked' : '');
+        row.innerHTML =
+          '<div class="ach-icon">' + a.icon + '</div>' +
+          '<div class="ach-info"><div class="ach-name">' + a.name + '</div><div class="ach-desc">' + a.desc + '</div></div>' +
+          '<div class="ach-check">✓</div>';
+        grid.appendChild(row);
+      });
+      document.getElementById('achLabel').textContent = count + ' / ' + ACHIEVEMENTS.length;
+      document.getElementById('achSub').textContent = count + ' of ' + ACHIEVEMENTS.length + ' unlocked';
+    }
+
+    function unlockAch(id) {
+      if (achState[id]) return;
+
+      if (!cookieConsent && !consentDeclined) {
+        pendingAchId = id;
+        var a = ACHIEVEMENTS.find(function(x) { return x.id === id; });
+        if (a) {
+          document.getElementById('cookieAchIcon').textContent = a.icon;
+          document.getElementById('cookieAchName').textContent = a.name;
+        }
+        document.getElementById('cookieOverlay').classList.add('active');
+        return;
+      }
+
+      doUnlock(id);
+    }
+
+    function doUnlock(id) {
+      if (achState[id]) return;
+      achState[id] = true;
+      saveAch();
+
+      var unlocked = ACHIEVEMENTS.filter(function(a) { return a.id !== 'completionist' && achState[a.id]; }).length;
+      if (unlocked >= ACHIEVEMENTS.length - 1 && !achState.completionist) {
+        achState.completionist = true;
+        saveAch();
+        setTimeout(function() {
+          showAchToast('completionist');
+          triggerCompletion();
+        }, 3500);
+      }
+
+      showAchToast(id);
+      renderAchPanel();
+    }
+
+    // ── Completion celebration ──
+    function triggerCompletion() {
+      document.body.classList.add('james-complete');
+      document.getElementById('completeBanner').classList.add('visible');
+      launchConfetti();
+    }
+
+    function checkCompletionOnLoad() {
+      var count = ACHIEVEMENTS.filter(function(a) { return achState[a.id]; }).length;
+      if (count >= ACHIEVEMENTS.length) {
+        document.body.classList.add('james-complete');
+        document.getElementById('completeBanner').classList.add('visible');
+      }
+    }
+
+    function launchConfetti() {
+      var canvas = document.getElementById('confettiCanvas');
+      var ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      var colors = ['#e9c46a', '#d62828', '#fff3b0', '#ffffff', '#1d3557', '#f4a261'];
+      var pieces = [];
+
+      for (var i = 0; i < 150; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * -canvas.height,
+          w: 6 + Math.random() * 8,
+          h: 4 + Math.random() * 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vy: 2 + Math.random() * 4,
+          vx: (Math.random() - 0.5) * 3,
+          rot: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 10,
+          opacity: 1
+        });
+      }
+
+      var frame = 0;
+      var maxFrames = 300;
+
+      function draw() {
+        frame++;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        var fadeStart = maxFrames * 0.7;
+        var allDone = true;
+
+        pieces.forEach(function(p) {
+          if (p.opacity <= 0) return;
+          allDone = false;
+
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.04;
+          p.rot += p.rotSpeed;
+          p.vx *= 0.999;
+
+          if (frame > fadeStart) {
+            p.opacity -= 0.012;
+            if (p.opacity < 0) p.opacity = 0;
+          }
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot * Math.PI / 180);
+          ctx.globalAlpha = p.opacity;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+
+        if (!allDone && frame < maxFrames + 100) {
+          requestAnimationFrame(draw);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      draw();
+
+      window.addEventListener('resize', function() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    }
+
+    function acceptCookies() {
+      cookieConsent = true;
+      setCookie('james_ach_consent', 'yes', 365);
+      document.getElementById('cookieOverlay').classList.remove('active');
+      if (pendingAchId) {
+        doUnlock(pendingAchId);
+        pendingAchId = null;
+      }
+    }
+
+    function declineCookies() {
+      consentDeclined = true;
+      document.getElementById('cookieOverlay').classList.remove('active');
+      if (pendingAchId) {
+        doUnlock(pendingAchId);
+        pendingAchId = null;
+      }
+    }
+
+    function showAchToast(id) {
+      var a = ACHIEVEMENTS.find(function(x) { return x.id === id; });
+      if (!a) return;
+      var toast = document.getElementById('achToast');
+      document.getElementById('achToastIcon').textContent = a.icon;
+      document.getElementById('achToastName').textContent = a.name;
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 3000);
+    }
+
+    function toggleAchPanel() {
+      document.getElementById('achOverlay').classList.toggle('active');
+    }
+
+    document.getElementById('achOverlay').addEventListener('click', function(e) {
+      if (e.target === this) toggleAchPanel();
+    });
+
+    renderAchPanel();
+    checkCompletionOnLoad();
   </script>
 
 </body>
