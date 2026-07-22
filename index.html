@@ -216,8 +216,65 @@
       flex-direction: column;
       gap: 0.6rem;
     }
-    .quotes-banner span {
-      display: block;
+    .quote-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+    }
+    .quote-item a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .quote-item a:hover {
+      color: var(--gold);
+    }
+    .share-btn {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      padding: 0;
+    }
+    .share-btn:hover {
+      background: rgba(233,196,106,0.3);
+      transform: scale(1.15);
+    }
+    .share-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: rgba(255,255,255,0.7);
+      stroke-width: 2;
+    }
+    .share-toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--gold);
+      color: var(--dark);
+      padding: 0.6rem 1.4rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      font-style: normal;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .share-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
 
     /* ── MAIN ── */
@@ -474,11 +531,38 @@
 
   <!-- ── QUOTES BANNER ── -->
   <div class="quotes-banner">
-    <span>"I hate for the love of the game, baby. -James 1/24/25"</span>
-    <span>"...If I was unemployed for that long, there probably wouldn't be a CRPG left on the planet that I have not played. -James 2/4/25"</span>
-    <span>"You right, if I didn't like being right I wouldn't be the way I am. -James 3/30/26"</span>
-	<span>"Why would I open my ears, a black woman was not speaking. -James 4/03/26"</span>
+    <div class="quote-item">
+      <a href="quotes/0.html">"I hate for the love of the game, baby. -James 1/24/25"</a>
+      <button class="share-btn" onclick="shareQuote(0)" title="Share this quote">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </button>
+    </div>
+    <div class="quote-item">
+      <a href="quotes/1.html">"...If I was unemployed for that long, there probably wouldn't be a CRPG left on the planet that I have not played. -James 2/4/25"</a>
+      <button class="share-btn" onclick="shareQuote(1)" title="Share this quote">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </button>
+    </div>
+    <div class="quote-item">
+      <a href="quotes/2.html">"You right, if I didn't like being right I wouldn't be the way I am. -James 3/30/26"</a>
+      <button class="share-btn" onclick="shareQuote(2)" title="Share this quote">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </button>
+    </div>
+    <div class="quote-item">
+      <a href="quotes/3.html">"Why would I open my ears, a black woman was not speaking. -James 4/03/26"</a>
+      <button class="share-btn" onclick="shareQuote(3)" title="Share this quote">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </button>
+    </div>
+    <div class="quote-item">
+      <a href="quotes/4.html">"I love Trevors toes" -James 7/21/26</a>
+      <button class="share-btn" onclick="shareQuote(4)" title="Share this quote">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </button>
+    </div>
   </div>
+  <div class="share-toast" id="shareToast">Link copied!</div>
 
   <!-- ── MAIN CONTENT ── -->
   <main>
@@ -683,6 +767,16 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeMagnify();
     });
+
+    // Share quote
+    function shareQuote(index) {
+      var url = 'https://jamesisaliberal.com/quotes/' + index + '.html';
+      navigator.clipboard.writeText(url).then(function() {
+        var t = document.getElementById('shareToast');
+        t.classList.add('show');
+        setTimeout(function() { t.classList.remove('show'); }, 2000);
+      });
+    }
   </script>
 
 </body>
