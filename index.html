@@ -502,12 +502,10 @@
     .ach-footer {
       display: flex;
       justify-content: center;
+      gap: 0.6rem;
       margin-top: 1.25rem;
     }
-    .ach-reset {
-      background: rgba(214,40,40,0.15);
-      border: 1px solid rgba(214,40,40,0.3);
-      color: var(--red);
+    .ach-reset, .ach-share {
       font-family: 'Source Sans 3', sans-serif;
       font-size: 0.8rem;
       font-weight: 700;
@@ -516,9 +514,26 @@
       border-radius: 999px;
       cursor: pointer;
       transition: background 0.2s, transform 0.2s;
+      border: none;
+    }
+    .ach-reset {
+      background: rgba(214,40,40,0.15);
+      border: 1px solid rgba(214,40,40,0.3);
+      color: var(--red);
     }
     .ach-reset:hover {
       background: rgba(214,40,40,0.25);
+      transform: scale(1.05);
+    }
+    .ach-share {
+      background: rgba(233,196,106,0.15);
+      border: 1px solid rgba(233,196,106,0.3);
+      color: var(--gold);
+      display: none;
+    }
+    .ach-share.visible { display: inline-block; }
+    .ach-share:hover {
+      background: rgba(233,196,106,0.25);
       transform: scale(1.05);
     }
     .ach-grid {
@@ -1276,6 +1291,7 @@
       <div class="ach-timer" id="achTimer"></div>
       <div class="ach-grid" id="achGrid"></div>
       <div class="ach-footer">
+        <button class="ach-share" id="achShare" onclick="shareAchTime()">Share Time</button>
         <button class="ach-reset" onclick="resetAchievements()">Reset All</button>
       </div>
     </div>
@@ -1661,6 +1677,22 @@
       updateTimerDisplay();
     }
 
+    function shareAchTime() {
+      if (!achFinishTime || !achStartTime) return;
+      var time = formatTimer(achFinishTime - achStartTime);
+      var text = 'I 100%\'d JamesIsALiberal.com in ' + time + '! Can you beat my time? jamesisaliberal.com';
+      if (navigator.share) {
+        navigator.share({ text: text }).catch(function() {});
+      } else {
+        navigator.clipboard.writeText(text).then(function() {
+          var btn = document.getElementById('achShare');
+          var orig = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(function() { btn.textContent = orig; }, 2000);
+        });
+      }
+    }
+
     function renderAchPanel() {
       var grid = document.getElementById('achGrid');
       var count = 0;
@@ -1678,6 +1710,12 @@
       });
       document.getElementById('achLabel').textContent = count + ' / ' + ACHIEVEMENTS.length;
       document.getElementById('achSub').textContent = count + ' of ' + ACHIEVEMENTS.length + ' unlocked';
+      var shareBtn = document.getElementById('achShare');
+      if (achFinishTime && achStartTime) {
+        shareBtn.classList.add('visible');
+      } else {
+        shareBtn.classList.remove('visible');
+      }
     }
 
     function unlockAch(id) {
