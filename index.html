@@ -480,7 +480,46 @@
       text-align: center;
       color: rgba(255,255,255,0.4);
       font-size: 0.85rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .ach-timer {
+      text-align: center;
+      font-family: 'Source Sans 3', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 1rem;
+      letter-spacing: 0.06em;
+      min-height: 1.4em;
+    }
+    .ach-timer.finished {
+      animation: timerPulse 1s ease-in-out 3;
+    }
+    @keyframes timerPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .ach-footer {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.25rem;
+    }
+    .ach-reset {
+      background: rgba(214,40,40,0.15);
+      border: 1px solid rgba(214,40,40,0.3);
+      color: var(--red);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.45rem 1.2rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .ach-reset:hover {
+      background: rgba(214,40,40,0.25);
+      transform: scale(1.05);
     }
     .ach-grid {
       display: flex;
@@ -1234,7 +1273,11 @@
       <button class="ach-close" onclick="toggleAchPanel()">&times;</button>
       <div class="ach-panel-title">Achievements</div>
       <div class="ach-panel-sub" id="achSub">0 of 7 unlocked</div>
+      <div class="ach-timer" id="achTimer"></div>
       <div class="ach-grid" id="achGrid"></div>
+      <div class="ach-footer">
+        <button class="ach-reset" onclick="resetAchievements()">Reset All</button>
+      </div>
     </div>
   </div>
 
@@ -1531,15 +1574,91 @@
     var consentDeclined = false;
     var pendingAchId = null;
     var achState = {};
+    var achStartTime = null;
+    var achFinishTime = null;
+    var timerInterval = null;
 
     if (cookieConsent) {
       try { achState = JSON.parse(getCookie('james_ach') || '{}'); } catch(e) { achState = {}; }
+      var savedStart = getCookie('james_ach_start');
+      if (savedStart) achStartTime = parseInt(savedStart, 10);
+      var savedFinish = getCookie('james_ach_finish');
+      if (savedFinish) achFinishTime = parseInt(savedFinish, 10);
     }
 
     function saveAch() {
       if (cookieConsent) {
         setCookie('james_ach', JSON.stringify(achState), 365);
+        if (achStartTime) setCookie('james_ach_start', achStartTime.toString(), 365);
+        if (achFinishTime) setCookie('james_ach_finish', achFinishTime.toString(), 365);
       }
+    }
+
+    function formatTimer(ms) {
+      var s = Math.floor(ms / 1000);
+      var m = Math.floor(s / 60);
+      var h = Math.floor(m / 60);
+      s = s % 60;
+      m = m % 60;
+      var parts = [];
+      if (h > 0) parts.push(h + 'h');
+      parts.push((m < 10 && h > 0 ? '0' : '') + m + 'm');
+      parts.push((s < 10 ? '0' : '') + s + 's');
+      return parts.join(' ');
+    }
+
+    function updateTimerDisplay() {
+      var el = document.getElementById('achTimer');
+      if (!achStartTime) {
+        el.textContent = '';
+        el.classList.remove('finished');
+        return;
+      }
+      if (achFinishTime) {
+        el.textContent = 'Completed in ' + formatTimer(achFinishTime - achStartTime);
+        el.classList.add('finished');
+        return;
+      }
+      el.textContent = formatTimer(Date.now() - achStartTime);
+      el.classList.remove('finished');
+    }
+
+    function startTimer() {
+      if (achStartTime) return;
+      achStartTime = Date.now();
+      saveAch();
+      timerInterval = setInterval(updateTimerDisplay, 1000);
+      updateTimerDisplay();
+    }
+
+    function stopTimer() {
+      achFinishTime = Date.now();
+      saveAch();
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      updateTimerDisplay();
+    }
+
+    function initTimerTick() {
+      if (achStartTime && !achFinishTime) {
+        timerInterval = setInterval(updateTimerDisplay, 1000);
+      }
+      updateTimerDisplay();
+    }
+
+    function resetAchievements() {
+      achState = {};
+      achStartTime = null;
+      achFinishTime = null;
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      if (cookieConsent) {
+        setCookie('james_ach', '{}', 365);
+        setCookie('james_ach_start', '', -1);
+        setCookie('james_ach_finish', '', -1);
+      }
+      document.body.classList.remove('james-complete');
+      document.getElementById('completeBanner').classList.remove('visible');
+      renderAchPanel();
+      updateTimerDisplay();
     }
 
     function renderAchPanel() {
@@ -1580,13 +1699,14 @@
 
     function doUnlock(id) {
       if (achState[id]) return;
+      startTimer();
       achState[id] = true;
       saveAch();
 
       var unlocked = ACHIEVEMENTS.filter(function(a) { return a.id !== 'completionist' && achState[a.id]; }).length;
       if (unlocked >= ACHIEVEMENTS.length - 1 && !achState.completionist) {
         achState.completionist = true;
-        saveAch();
+        stopTimer();
         setTimeout(function() {
           showAchToast('completionist');
           triggerCompletion();
@@ -1724,6 +1844,7 @@
 
     renderAchPanel();
     checkCompletionOnLoad();
+    initTimerTick();
   </script>
 
 </body>
