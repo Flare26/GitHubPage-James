@@ -9,7 +9,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Lora:ital,wght@1,500;1,600&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet"/>
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -307,8 +307,9 @@
       box-shadow: 0 8px 30px rgba(0,0,0,0.2);
     }
     .tl-card a {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Lora', serif;
       font-style: italic;
+      font-weight: 500;
       font-size: 1rem;
       color: rgba(255,255,255,0.85);
       text-decoration: none;
@@ -350,6 +351,18 @@
       fill: none;
       stroke: rgba(255,255,255,0.7);
       stroke-width: 2;
+    }
+
+    .tl-stars {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .tl-stars span {
+      position: absolute;
+      border-radius: 50%;
+      animation: twinkle 3s ease-in-out infinite alternate;
     }
 
     @media (max-width: 600px) {
@@ -886,17 +899,15 @@
     .magnify-close:hover { background: rgba(255,255,255,0.2); }
 
     /* ── AUDIO-REACTIVE ── */
-    .audio-active .stars span {
-      transition: transform 0.05s ease-out;
-    }
-    .audio-active .hero-content h1 .accent {
-      transition: text-shadow 0.08s ease-out, transform 0.08s ease-out;
-    }
-    .audio-active .anthem-bar {
-      transition: border-color 0.08s ease-out, box-shadow 0.08s ease-out;
-    }
-    .audio-active .tl-dot {
-      transition: box-shadow 0.08s ease-out, transform 0.08s ease-out;
+    /* JS envelopes do the smoothing at 60fps; CSS transitions restarting
+       every frame just lag and shimmer, so disable them during playback */
+    .audio-active .stars span,
+    .audio-active .tl-stars span,
+    .audio-active .hero-content h1 .accent,
+    .audio-active .anthem-bar,
+    .audio-active .tl-dot,
+    .audio-active .gallery-item {
+      transition: none;
     }
 
     /* ── 100% COMPLETION ── */
@@ -1001,6 +1012,7 @@
 
   <!-- ── QUOTES TIMELINE ── -->
   <div class="timeline-section">
+    <div class="tl-stars" id="tlStars"></div>
     <div class="timeline-title">The <span>James</span> Archives</div>
     <div class="timeline">
 
@@ -1254,6 +1266,22 @@
       starsContainer.appendChild(star);
     }
 
+    // ── Timeline colored stars ──
+    var tlStarsContainer = document.getElementById('tlStars');
+    var tlStarColors = ['#e9c46a', '#ff6b6b', '#a8dadc', '#ffffff', '#f4a261', '#c8b6ff'];
+    for (var t = 0; t < 50; t++) {
+      var ts = document.createElement('span');
+      var tsColor = tlStarColors[Math.floor(Math.random() * tlStarColors.length)];
+      ts.style.left = Math.random() * 100 + '%';
+      ts.style.top = Math.random() * 100 + '%';
+      ts.style.width = ts.style.height = (1.5 + Math.random() * 3) + 'px';
+      ts.style.background = tsColor;
+      ts.dataset.color = tsColor;
+      ts.style.animationDelay = (Math.random() * 3) + 's';
+      ts.style.animationDuration = (2 + Math.random() * 3) + 's';
+      tlStarsContainer.appendChild(ts);
+    }
+
     // ── Audio + Visualizer ──
     var jamesAnthem = document.getElementById('jamesAnthem');
     var playAnthemBtn = document.getElementById('playAnthem');
@@ -1262,14 +1290,19 @@
 
     var audioCtx = null;
     var analyser = null;
+    var gainNode;
     var freqData = null;
     var audioSourceCreated = false;
+    var vizEls = null;
+    var bassEnv = 0;
+    var vocalEnv = 0;
 
     function initAudio() {
       if (audioCtx) return;
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 256;
+      analyser.fftSize = 1024;
+      analyser.smoothingTimeConstant = 0.75;
       freqData = new Uint8Array(analyser.frequencyBinCount);
       if (!audioSourceCreated) {
         var source = audioCtx.createMediaElementSource(jamesAnthem);
@@ -1279,51 +1312,98 @@
       }
     }
 
+    // Average level (0-1) of a frequency band in Hz
+    function bandLevel(loHz, hiHz) {
+      var nyquist = audioCtx.sampleRate / 2;
+      var lo = Math.max(0, Math.floor(loHz / nyquist * freqData.length));
+      var hi = Math.min(freqData.length - 1, Math.ceil(hiHz / nyquist * freqData.length));
+      var sum = 0;
+      for (var i = lo; i <= hi; i++) sum += freqData[i];
+      return sum / ((hi - lo + 1) * 255);
+    }
+
+    function cacheVizEls() {
+      var stars = [];
+      document.querySelectorAll('.stars span, .tl-stars span').forEach(function(s) {
+        // twinkle keyframes own transform/opacity — release them so JS can drive
+        s.style.animation = 'none';
+        stars.push({ el: s, sens: 0.4 + Math.random() * 1.1 });
+      });
+      vizEls = {
+        accent: document.querySelector('.hero-content h1 .accent'),
+        anthemBar: document.querySelector('.anthem-bar'),
+        dots: document.querySelectorAll('.tl-dot'),
+        gallery: document.querySelectorAll('.gallery-item'),
+        stars: stars
+      };
+    }
+
+    function resetAudioStyles() {
+      document.body.classList.remove('audio-active');
+      if (!vizEls) return;
+      if (vizEls.accent) { vizEls.accent.style.textShadow = ''; vizEls.accent.style.transform = ''; }
+      if (vizEls.anthemBar) { vizEls.anthemBar.style.borderBottomColor = ''; vizEls.anthemBar.style.boxShadow = ''; }
+      vizEls.dots.forEach(function(d) { d.style.transform = ''; d.style.boxShadow = ''; });
+      vizEls.gallery.forEach(function(g) { g.style.boxShadow = ''; });
+      vizEls.stars.forEach(function(s) {
+        s.el.style.animation = '';
+        s.el.style.transform = '';
+        s.el.style.opacity = '';
+        s.el.style.boxShadow = '';
+      });
+    }
+
     function audioPulseLoop() {
       if (!analyser || jamesAnthem.paused) {
-        document.body.classList.remove('audio-active');
+        resetAudioStyles();
         return;
       }
       document.body.classList.add('audio-active');
       analyser.getByteFrequencyData(freqData);
 
-      var bass = 0;
-      for (var i = 0; i < 8; i++) bass += freqData[i];
-      bass = bass / (8 * 255);
+      // Simple energy followers — no beat detection, no triggers. The glow
+      // just follows the low end's actual loudness contour: quick-ish rise,
+      // slow fall. A power curve stretches the dynamics so loud moments pop
+      // and quiet ones sit low, which reads as rhythm without any detection.
+      var bassRaw = bandLevel(40, 200);
+      bassEnv = bassRaw > bassEnv
+        ? bassEnv * 0.7 + bassRaw * 0.3
+        : bassEnv * 0.93 + bassRaw * 0.07;
+      var kick = Math.min(1, Math.pow(bassEnv * 1.5, 2));
 
-      var mid = 0;
-      for (var j = 8; j < 40; j++) mid += freqData[j];
-      mid = mid / (32 * 255);
+      // Vocals (250Hz-3.2kHz): same follower, slightly floatier release
+      var vocalRaw = bandLevel(250, 3200);
+      vocalEnv = vocalRaw > vocalEnv
+        ? vocalEnv * 0.7 + vocalRaw * 0.3
+        : vocalEnv * 0.94 + vocalRaw * 0.06;
 
-      var accentEl = document.querySelector('.hero-content h1 .accent');
-      if (accentEl) {
-        var glow = Math.round(bass * 40);
-        accentEl.style.textShadow = '0 0 ' + glow + 'px rgba(233,196,106,' + (bass * 0.8) + ')';
-        accentEl.style.transform = 'scale(' + (1 + bass * 0.08) + ')';
+      // ── Kick-driven glows ──
+      if (vizEls.accent) {
+        vizEls.accent.style.textShadow = '0 0 ' + Math.round(kick * 70) + 'px rgba(233,196,106,' + (kick * 0.95).toFixed(3) + ')';
+        vizEls.accent.style.transform = 'scale(' + (1 + kick * 0.15).toFixed(4) + ')';
       }
 
-      var anthemBar = document.querySelector('.anthem-bar');
-      if (anthemBar) {
-        var bIntensity = Math.round(bass * 255);
-        anthemBar.style.borderBottomColor = 'rgb(233,' + Math.round(196 + bass * 59) + ',' + Math.round(106 + bass * 100) + ')';
-        anthemBar.style.boxShadow = '0 4px ' + Math.round(bass * 30) + 'px rgba(233,196,106,' + (bass * 0.5) + ')';
+      if (vizEls.anthemBar) {
+        vizEls.anthemBar.style.borderBottomColor = 'rgb(233,' + Math.round(196 + kick * 59) + ',' + Math.round(106 + kick * 120) + ')';
+        vizEls.anthemBar.style.boxShadow = '0 4px ' + Math.round(kick * 45) + 'px rgba(233,196,106,' + (kick * 0.7).toFixed(3) + ')';
       }
 
-      document.querySelectorAll('.tl-dot').forEach(function(dot) {
-        dot.style.transform = 'scale(' + (1 + mid * 0.6) + ')';
-        dot.style.boxShadow = '0 0 ' + Math.round(12 + mid * 20) + 'px rgba(233,196,106,' + (0.4 + mid * 0.5) + ')';
+      vizEls.dots.forEach(function(dot) {
+        dot.style.transform = 'scale(' + (1 + kick * 0.9).toFixed(4) + ')';
+        dot.style.boxShadow = '0 0 ' + Math.round(12 + kick * 35) + 'px rgba(233,196,106,' + (0.4 + kick * 0.6).toFixed(3) + ')';
       });
 
-      document.querySelectorAll('.stars span').forEach(function(star, idx) {
-        if (idx % 3 === 0) {
-          star.style.transform = 'scale(' + (1 + bass * 2) + ')';
-          star.style.opacity = (0.3 + bass * 0.7);
-        }
+      vizEls.gallery.forEach(function(item) {
+        item.style.boxShadow = '0 6px ' + Math.round(24 + kick * 40) + 'px rgba(233,196,106,' + (kick * 0.45).toFixed(3) + ')';
       });
 
-      var galleryItems = document.querySelectorAll('.gallery-item');
-      galleryItems.forEach(function(item) {
-        item.style.boxShadow = '0 6px ' + Math.round(24 + mid * 30) + 'px rgba(233,196,106,' + (mid * 0.3) + ')';
+      // ── Vocal-driven stars (hero + timeline) ──
+      vizEls.stars.forEach(function(s) {
+        var v = Math.min(1.4, vocalEnv * s.sens * 2.2);
+        s.el.style.transform = 'scale(' + (1 + v * 1.8).toFixed(4) + ')';
+        s.el.style.opacity = Math.min(1, 0.25 + v).toFixed(3);
+        var c = s.el.dataset.color || 'rgba(255,255,255,0.8)';
+        s.el.style.boxShadow = '0 0 ' + Math.round(v * 14) + 'px ' + c;
       });
 
       requestAnimationFrame(audioPulseLoop);
@@ -1331,6 +1411,8 @@
 
     playAnthemBtn.addEventListener('click', function() {
       initAudio();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      cacheVizEls();
       jamesAnthem.currentTime = 0;
       jamesAnthem.play().then(function() {
         audioPulseLoop();
@@ -1338,15 +1420,7 @@
       unlockAch('anthem');
     });
 
-    jamesAnthem.addEventListener('ended', function() {
-      document.body.classList.remove('audio-active');
-      var accentEl = document.querySelector('.hero-content h1 .accent');
-      if (accentEl) { accentEl.style.textShadow = ''; accentEl.style.transform = ''; }
-      var anthemBar = document.querySelector('.anthem-bar');
-      if (anthemBar) { anthemBar.style.borderBottomColor = ''; anthemBar.style.boxShadow = ''; }
-      document.querySelectorAll('.tl-dot').forEach(function(d) { d.style.transform = ''; d.style.boxShadow = ''; });
-      document.querySelectorAll('.gallery-item').forEach(function(g) { g.style.boxShadow = ''; });
-    });
+    jamesAnthem.addEventListener('ended', resetAudioStyles);
 
     volumeControl.addEventListener('input', function() {
       jamesAnthem.volume = volumeControl.value;
