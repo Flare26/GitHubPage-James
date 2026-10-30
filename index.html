@@ -319,6 +319,11 @@
     .tl-card a:hover {
       color: var(--gold);
     }
+    .tl-card a.team-link {
+      text-decoration: underline;
+      text-decoration-color: #6cabdd;
+      text-underline-offset: 3px;
+    }
     .tl-actions {
       display: flex;
       gap: 0.5rem;
@@ -1221,6 +1226,19 @@
           <a href="quotes/4.html" onclick="unlockAch('quote_clicked')">"I love Trevor's toes"</a>
           <div class="tl-actions">
             <button class="share-btn" onclick="shareQuote(4)" title="Share this quote">
+              <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-date">October 29, 2026</div>
+        <div class="tl-card">
+          <a href="quotes/5.html" onclick="unlockAch('quote_clicked')">"You should be thankful </a><a href="https://www.mancity.com" class="team-link" target="_blank" rel="noopener">Man</a><a href="quotes/5.html" onclick="unlockAch('quote_clicked')"> city cheated"</a>
+          <div class="tl-actions">
+            <button class="share-btn" onclick="shareQuote(5)" title="Share this quote">
               <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             </button>
           </div>
